@@ -6,8 +6,7 @@ async function run() {
   try {
     const githubToken = core.getInput("github_token");
 
-    core.setOutput("result", githubToken);
-
+    core.info(`github token: ${githubToken}`);
   } catch (error) {
     core.setFailed(error.message);
   }

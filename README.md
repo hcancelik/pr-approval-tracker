@@ -1,6 +1,6 @@
 # Pull Request Review Approval Tracker
 
-// TODO:: Write a brief description
+This action will label open PRs with the count of approved reviews for quick referencing.
 
 # Usage
 

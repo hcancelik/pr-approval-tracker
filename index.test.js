@@ -1,9 +1,5 @@
-const core = require("@actions/core");
-
 test("true is true", async () => {
-  const githubToken = core.getInput("github_token");
-
-  core.info(`github token: ${githubToken}`);
+  console.log(`github token: ${process.env.TEST_KEY}`);
 
   expect(true).toBeTruthy();
 });

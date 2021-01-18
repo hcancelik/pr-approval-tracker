@@ -12,10 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        github_token: ${{ secrets.WORKFLOW_TEST_SECRET }}
     - run: npm ci
-    - run: npm test
+    - run: TEST_KEY=${{ secrets.WORKFLOW_TEST_SECRET }} npm test
 
   # test action works running from the graph
   test:

@@ -1,13 +1,15 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: 'Pull Request Approval Tracker'
+description: 'Check pull requests for review approval and mark them'
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
+  github_token:
+    description: 'Github secret token'
     required: true
-    default: '1000'
 outputs:
-  time: # output will be available to future steps
-    description: 'The message to output'
+  result:
+    description: "Result of the action call"
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: tag
+  color: gray-dark

@@ -1,7 +1,7 @@
 {
-  "name": "javascript-action",
+  "name": "pr-approval-tracker",
   "version": "1.0.0",
-  "description": "JavaScript Action Template",
+  "description": "Pull Request Approval Tracker",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
@@ -11,19 +11,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/javascript-action.git"
+    "url": "git+https://github.com/hcancelik/pr-approval-tracker.git"
   },
   "keywords": [
+    "Pull Request Review Tracker",
+    "Pull Request",
     "GitHub",
     "Actions",
     "JavaScript"
   ],
-  "author": "",
+  "author": "Hikmet Can Celik",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/actions/javascript-action/issues"
+    "url": "https://github.com/hcancelik/pr-approval-tracker/issues"
   },
-  "homepage": "https://github.com/actions/javascript-action#readme",
+  "homepage": "https://github.com/hcancelik/pr-approval-tracker/issues#readme",
   "dependencies": {
     "@actions/core": "^1.2.5",
     "@actions/github": "^4.0.0"

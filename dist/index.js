@@ -6,13 +6,13 @@ require('./sourcemap-register.js');module.exports =
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(186);
-const github = __nccwpck_require__(438);
+const { context: github } = __nccwpck_require__(438);
 const action = __nccwpck_require__(348);
 
 async function run() {
   try {
     const token = github.token;
-    const { owner, repo } = github.context.repo;
+    const { owner, repo } = github.repo;
 
     await action.run(token, owner, repo);
   } catch (error) {

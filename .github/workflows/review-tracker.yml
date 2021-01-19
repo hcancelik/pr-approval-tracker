@@ -6,4 +6,4 @@ jobs:
     steps:
       - uses: hcancelik/pr-approval-tracker@main
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          secret_token: ${{ secrets.GITHUB_TOKEN }}

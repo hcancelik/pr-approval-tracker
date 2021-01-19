@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: npm ci
-    - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} npm test
+    - run: GITHUB_TOKEN=${{ secrets.WORKFLOW_TEST_SECRET }} npm test
 
   # test action works running from the graph
   test:
@@ -22,4 +22,4 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ./
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.WORKFLOW_TEST_SECRET }}

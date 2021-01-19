@@ -1,19 +1,17 @@
 # Pull Request Review Approval Tracker
 
-// TODO:: Write a brief description
+This action will label open PRs with the count of approved reviews for quick referencing.
 
 # Usage
 
 ```yaml
-on:
-  push:
-    branches:
-      - master
+name: "review-tracker"
+on: pull_request_review
 jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hcancelik/pr-approval-tracker
+      - uses: hcancelik/pr-approval-tracker@main
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          secret_token: ${{ secrets.GITHUB_TOKEN }}
 ```

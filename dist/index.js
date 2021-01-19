@@ -11,9 +11,8 @@ const action = __nccwpck_require__(348);
 
 async function run() {
   try {
-    const token = core.getInput("github_token");
-    const owner = github.repo.owner;
-    const repo = github.repo.repo;
+    const token = github.token;
+    const { owner, repo } = github.context.repo;
 
     await action.run(token, owner, repo);
   } catch (error) {

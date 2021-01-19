@@ -1,12 +1,5 @@
 name: 'Pull Request Approval Tracker'
 description: 'Check pull requests for review approval and mark them'
-inputs:
-  github_token:
-    description: 'Github secret token'
-    required: true
-outputs:
-  result:
-    description: "Result of the action call"
 runs:
   using: 'node12'
   main: 'dist/index.js'

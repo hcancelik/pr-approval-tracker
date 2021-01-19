@@ -4,7 +4,7 @@ const action = require("./src/action");
 
 async function run() {
   try {
-    const token = core.getInput("github_token");
+    const token = github.token;
     const owner = github.repo.owner;
     const repo = github.repo.repo;
 

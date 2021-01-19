@@ -4,6 +4,6 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hcancelik/pr-approval-tracker
+      - uses: hcancelik/pr-approval-tracker@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

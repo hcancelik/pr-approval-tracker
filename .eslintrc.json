@@ -14,6 +14,8 @@
         "ecmaVersion": 2018
     },
     "rules": {
-        "quotes": ["error", "double"]
+        "quotes": ["error", "double"],
+        "semi": ["error", "always"],
+        "prefer-template" : "error"
     }
 }

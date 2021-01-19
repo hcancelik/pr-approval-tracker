@@ -1,12 +1,14 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
+const action = require("./src/action");
 
-// most @actions toolkit packages have async methods
 async function run() {
   try {
-    const githubToken = core.getInput("github_token");
+    const token = core.getInput("github_token");
+    const owner = github.repo.owner;
+    const repo = github.repo.repo;
 
-    core.info(`github token: ${githubToken}`);
+    await action.run(token, owner, repo);
   } catch (error) {
     core.setFailed(error.message);
   }

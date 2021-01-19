@@ -1,5 +1,15 @@
+const action = require("./src/action");
+
+let token;
+let owner = "hcancelik";
+let repo = "pr-approval-tracker";
+
+beforeAll(() => {
+  token = process.env.GITHUB_TOKEN;
+});
+
 test("true is true", async () => {
-  console.log(`github token: ${process.env.TEST_KEY}`);
+  // TODO: Update tests
 
   expect(true).toBeTruthy();
 });

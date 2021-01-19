@@ -7,13 +7,15 @@ require('./sourcemap-register.js');module.exports =
 
 const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
+const action = __nccwpck_require__(348);
 
-// most @actions toolkit packages have async methods
 async function run() {
   try {
-    const githubToken = core.getInput("github_token");
+    const token = core.getInput("github_token");
+    const owner = github.repo.owner;
+    const repo = github.repo.repo;
 
-    core.info(`github token: ${githubToken}`);
+    await action.run(token, owner, repo);
   } catch (error) {
     core.setFailed(error.message);
   }
@@ -5834,6 +5836,160 @@ function wrappy (fn, cb) {
     return ret
   }
 }
+
+
+/***/ }),
+
+/***/ 348:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const api = __nccwpck_require__(612);
+const helper = __nccwpck_require__(989);
+
+module.exports = {
+  run: async (token, owner, repo) => {
+    const pullRequests = await api.getOpenPullRequests(token, owner, repo);
+
+    for await (const pullRequest of pullRequests) {
+      const reviews = await api.getPullRequestReviews(token, owner, repo, pullRequest.number);
+
+      const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
+
+      const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
+
+      const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
+
+      if (newLabels !== null) {
+        await api.setPullRequestLabels(token, owner, repo, pullRequest.number, newLabels);
+      }
+    }
+  }
+};
+
+
+/***/ }),
+
+/***/ 612:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(186);
+const github = __nccwpck_require__(438);
+
+module.exports = {
+  getOpenPullRequests: async (token, owner, repo) => {
+    const octokit = github.getOctokit(token);
+
+    let pullRequests = [];
+    let page = 0;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      try {
+        const { data: prs } = await octokit.pulls.list({
+          owner,
+          repo,
+          state: "open",
+          per_page: 100,
+          page
+        });
+
+        prs.forEach((pr) => pullRequests.push(pr));
+
+        page += 1;
+        hasNextPage = prs.length === 100;
+      } catch (error) {
+        hasNextPage = false;
+        core.setFailed(`Get open pull request call failed: ${error}`);
+      }
+    }
+
+    core.info(`Number of Open PRs: ${pullRequests.length}`);
+
+    return pullRequests;
+  },
+  getPullRequestReviews: async (token, owner, repo, id) => {
+    const octokit = github.getOctokit(token);
+
+    let reviews = [];
+    let page = 0;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      try {
+        const { data:rvs } = await octokit.pulls.listReviews({
+          owner,
+          repo,
+          pull_number: id,
+          per_page: 100,
+          page
+        });
+
+        rvs.forEach((rv) => reviews.push(rv));
+
+        page += 1;
+        hasNextPage = rvs.length === 100;
+      } catch (error) {
+        hasNextPage = false;
+        core.setFailed(`Get pull request reviews call failed: ${error}`);
+      }
+    }
+
+    return reviews;
+  },
+  setPullRequestLabels: async(token, owner, repo, id, labels) => {
+    const octokit = github.getOctokit(token);
+
+    try {
+      await octokit.issues.setLabels({
+        owner,
+        repo,
+        issue_number: id,
+        labels
+      });
+
+      return true;
+    } catch (error) {
+      core.setFailed(`Create label request call failed: ${error}`);
+
+      return false;
+    }
+  }
+};
+
+
+/***/ }),
+
+/***/ 989:
+/***/ ((module) => {
+
+module.exports = {
+  getDesiredLabel: (numOfApprovedReviews) => {
+    if (numOfApprovedReviews === 0) {
+      return null;
+    } else {
+      return `Approved +${numOfApprovedReviews}`;
+    }
+  },
+  getUpdatedLabels: (pullRequest, newLabel) => {
+    // First check if there is any need for change
+    if (pullRequest.labels.filter((label) => label.name === newLabel).length > 0) {
+      if (pullRequest.labels.filter((l) => l.name.startsWith("Approved +")).length === 1) {
+        return null;
+      }
+    }
+
+    // Get existing labels except action ones and add the desired label
+    const existingLabels = pullRequest.labels
+      .filter((l) => !l.name.startsWith("Approved +"))
+      .map((l) => l.name);
+
+    if (newLabel) {
+      existingLabels.push(newLabel);
+    }
+
+    return existingLabels;
+  }
+};
 
 
 /***/ }),

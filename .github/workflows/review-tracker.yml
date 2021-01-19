@@ -1,0 +1,9 @@
+name: "review-tracker"
+on: pull_request_review
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hcancelik/pr-approval-tracker
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

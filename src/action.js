@@ -33,9 +33,15 @@ class Action {
   }
 
   async updateLabels (pullRequest, reviews) {
-    const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
+    let approvedReviews = new Set();
 
-    const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
+    reviews.forEach((review) => {
+      if (review.state.toLowerCase() === "approved") {
+        approvedReviews.add(review.user.login);
+      }
+    });
+
+    const desiredLabel = helper.getDesiredLabel(approvedReviews.size);
 
     const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
 

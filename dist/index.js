@@ -5908,10 +5908,14 @@ class Action {
 
     const desiredLabel = helper.getDesiredLabel(approvedReviews.size);
 
-    const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
+    const labelToRemove = helper.existingLabelNeedsToBeRemoved(pullRequest, desiredLabel);
 
-    if (newLabels !== null) {
-      await api.setPullRequestLabels(this.token, this.owner, this.repo, pullRequest.number, newLabels);
+    if (labelToRemove) {
+      await api.removeLabelFromPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
+    }
+
+    if (helper.newLabelNeeded(pullRequest, desiredLabel)) {
+      await api.addLabelToPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
     }
   }
 }
@@ -6004,11 +6008,11 @@ module.exports = {
 
     return reviews;
   },
-  setPullRequestLabels: async(token, owner, repo, id, labels) => {
+  addLabelToPullRequest: async (token, owner, repo, id, labels) => {
     const octokit = github.getOctokit(token);
 
     try {
-      await octokit.issues.setLabels({
+      await octokit.issues.addLabels({
         owner,
         repo,
         issue_number: id,
@@ -6017,11 +6021,29 @@ module.exports = {
 
       return true;
     } catch (error) {
-      core.setFailed(`Create label request call failed: ${error}`);
+      core.setFailed(`Add label request call failed: ${error}`);
 
       return false;
     }
-  }
+  },
+  removeLabelFromPullRequest: async (token, owner, repo, id, name) => {
+    const octokit = github.getOctokit(token);
+
+    try {
+      await octokit.issues.removeLabel({
+        owner,
+        repo,
+        issue_number: id,
+        name
+      });
+
+      return true;
+    } catch (error) {
+      core.setFailed(`Remove label request call failed: ${error}`);
+
+      return false;
+    }
+  },
 };
 
 
@@ -6038,25 +6060,29 @@ module.exports = {
       return `Approved +${numOfApprovedReviews}`;
     }
   },
-  getUpdatedLabels: (pullRequest, newLabel) => {
-    // First check if there is any need for change
+  existingLabelNeedsToBeRemoved: (pullRequest, newLabel) => {
+    const existingLabels = pullRequest.labels
+      .filter((l) => l.name.startsWith("Approved +") && l.name !== newLabel)
+      .map((l) => l.name);
+
+    if (existingLabels.length > 0) {
+      return existingLabels[0];
+    }
+
+    return false;
+  },
+  newLabelNeeded: (pullRequest, newLabel) => {
+    // if new label already exists
     if (pullRequest.labels.filter((label) => label.name === newLabel).length > 0) {
+      // if there are no other action labels(they should start with Approved +)
       if (pullRequest.labels.filter((l) => l.name.startsWith("Approved +")).length === 1) {
-        return null;
+        // no action needed;
+        return false;
       }
     }
 
-    // Get existing labels except action ones and add the desired label
-    const existingLabels = pullRequest.labels
-      .filter((l) => !l.name.startsWith("Approved +"))
-      .map((l) => l.name);
-
-    if (newLabel) {
-      existingLabels.push(newLabel);
-    }
-
-    return existingLabels;
-  }
+    return true;
+  },
 };
 
 

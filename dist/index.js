@@ -12,7 +12,11 @@ const action = __nccwpck_require__(348);
 async function run() {
   try {
     const token = core.getInput("SECRET_TOKEN");
-    const { owner, repo } = github.repo;
+    const { owner, repo,  } = github.repo;
+    const { ref } = github;
+
+    core.info(`Ref is ${ref}`);
+    core.info(`G is ${github}`);
 
     await action.run(token, owner, repo);
   } catch (error) {

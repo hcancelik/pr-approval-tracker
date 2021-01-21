@@ -11,6 +11,7 @@ async function run() {
     let pr = null;
 
     core.info(`Ref is ${ref}`);
+
     core.info(`G is ${JSON.stringify(github)}`);
 
     await action.run(token, owner, repo, pr);

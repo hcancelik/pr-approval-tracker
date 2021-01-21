@@ -36,8 +36,21 @@ class Action {
     let approvedReviews = new Set();
 
     reviews.forEach((review) => {
-      if (review.state.toLowerCase() === "approved") {
-        approvedReviews.add(review.user.login);
+      const status = review.state.toLowerCase();
+      const user = review.user.login;
+
+      if (status === "approved") {
+        approvedReviews.add(user);
+      } else if (status === "dismissed") {
+        const count = reviews.filter((r) => {
+          return r.user.login === user &&
+            r.state.toLowerCase() === "approved" &&
+            r.submitted_at > review.submitted_at;
+        }).length;
+
+        if (count === 0) {
+          approvedReviews.delete(user);
+        }
       }
     });
 

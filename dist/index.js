@@ -7,20 +7,22 @@ require('./sourcemap-register.js');module.exports =
 
 const core = __nccwpck_require__(186);
 const { context: github } = __nccwpck_require__(438);
-const action = __nccwpck_require__(348);
+const Action = __nccwpck_require__(348);
 
 async function run() {
   try {
     const token = core.getInput("SECRET_TOKEN");
     const { owner, repo } = github.repo;
-    const { ref } = github;
 
     let pr = null;
 
-    core.info(`Ref is ${ref}`);
-    core.info(`G is ${JSON.stringify(github)}`);
+    if (github.payload && github.payload.pull_request) {
+      pr = github.payload.pull_request;
+    }
 
-    await action.run(token, owner, repo, pr);
+    const action = new Action(token, owner, repo);
+
+    await action.run(pr);
   } catch (error) {
     core.setFailed(error.message);
   }
@@ -5851,31 +5853,38 @@ function wrappy (fn, cb) {
 const api = __nccwpck_require__(612);
 const helper = __nccwpck_require__(989);
 
-module.exports = {
-  run: async (token, owner, repo, pr = null) => {
+class Action {
+  constructor (token, owner, repo) {
+    this.token = token;
+    this.owner = owner;
+    this.repo = repo;
+  }
+
+  async run (pr = null) {
     if (pr) {
-      await module.exports.checkPR(token, owner, repor, pr);
+      await this.checkPR(pr);
     } else {
-      await module.exports.checkAllPRs(token, owner, repo);
+      await this.checkAllPRs();
     }
-  },
-  checkPR: async(token, owner, repo, pr) => {
-    const pullRequest = await api.getPullRequest(pr);
+  }
 
-    const reviews = await api.getPullRequestReviews(token, owner, repo, pr);
+  async checkPR (pr) {
+    const reviews = await api.getPullRequestReviews(this.token, this.owner, this.repo, pr.number);
 
-    await module.exports.checkLabels(token, owner, repo, pullRequest, reviews);
-  },
-  checkAllPRs: async (token, owner, repo) => {
-    const pullRequests = await api.getOpenPullRequests(token, owner, repo);
+    await this.updateLabels(pr, reviews);
+  }
+
+  async checkAllPRs () {
+    const pullRequests = await api.getOpenPullRequests(this.token, this.owner, this.repo);
 
     for await (const pullRequest of pullRequests) {
-      const reviews = await api.getPullRequestReviews(token, owner, repo, pullRequest.number);
+      const reviews = await api.getPullRequestReviews(this.token, this.owner, this.repo, pullRequest.number);
 
-      await module.exports.checkLabels(token, owner, repo, pullRequest, reviews);
+      await this.updateLabels(pullRequest, reviews);
     }
-  },
-  checkLabels: async(token, owner, repo, pullRequest, reviews) => {
+  }
+
+  async updateLabels (pullRequest, reviews) {
     const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
 
     const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
@@ -5883,10 +5892,12 @@ module.exports = {
     const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
 
     if (newLabels !== null) {
-      await api.setPullRequestLabels(token, owner, repo, pullRequest.number, newLabels);
+      await api.setPullRequestLabels(this.token, this.owner, this.repo, pullRequest.number, newLabels);
     }
   }
-};
+}
+
+module.exports = Action;
 
 
 /***/ }),

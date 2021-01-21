@@ -1,31 +1,38 @@
 const api = require("./api");
 const helper = require("./helper");
 
-module.exports = {
-  run: async (token, owner, repo, pr = null) => {
+class Action {
+  constructor (token, owner, repo) {
+    this.token = token;
+    this.owner = owner;
+    this.repo = repo;
+  }
+
+  async run (pr = null) {
     if (pr) {
-      await module.exports.checkPR(token, owner, repor, pr);
+      await this.checkPR(pr);
     } else {
-      await module.exports.checkAllPRs(token, owner, repo);
+      await this.checkAllPRs();
     }
-  },
-  checkPR: async(token, owner, repo, pr) => {
-    const pullRequest = await api.getPullRequest(pr);
+  }
 
-    const reviews = await api.getPullRequestReviews(token, owner, repo, pr);
+  async checkPR (pr) {
+    const reviews = await api.getPullRequestReviews(this.token, this.owner, this.repo, pr.number);
 
-    await module.exports.checkLabels(token, owner, repo, pullRequest, reviews);
-  },
-  checkAllPRs: async (token, owner, repo) => {
-    const pullRequests = await api.getOpenPullRequests(token, owner, repo);
+    await this.updateLabels(pr, reviews);
+  }
+
+  async checkAllPRs () {
+    const pullRequests = await api.getOpenPullRequests(this.token, this.owner, this.repo);
 
     for await (const pullRequest of pullRequests) {
-      const reviews = await api.getPullRequestReviews(token, owner, repo, pullRequest.number);
+      const reviews = await api.getPullRequestReviews(this.token, this.owner, this.repo, pullRequest.number);
 
-      await module.exports.checkLabels(token, owner, repo, pullRequest, reviews);
+      await this.updateLabels(pullRequest, reviews);
     }
-  },
-  checkLabels: async(token, owner, repo, pullRequest, reviews) => {
+  }
+
+  async updateLabels (pullRequest, reviews) {
     const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
 
     const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
@@ -33,7 +40,9 @@ module.exports = {
     const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
 
     if (newLabels !== null) {
-      await api.setPullRequestLabels(token, owner, repo, pullRequest.number, newLabels);
+      await api.setPullRequestLabels(this.token, this.owner, this.repo, pullRequest.number, newLabels);
     }
   }
-};
+}
+
+module.exports = Action;

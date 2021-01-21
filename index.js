@@ -9,7 +9,7 @@ async function run() {
     const { ref } = github;
 
     core.info(`Ref is ${ref}`);
-    core.info(`G is ${github}`);
+    core.info(`G is ${JSON.stringify(github)}`);
 
     await action.run(token, owner, repo);
   } catch (error) {

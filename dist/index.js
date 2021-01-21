@@ -5885,9 +5885,28 @@ class Action {
   }
 
   async updateLabels (pullRequest, reviews) {
-    const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
+    let approvedReviews = new Set();
 
-    const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
+    reviews.forEach((review) => {
+      const status = review.state.toLowerCase();
+      const user = review.user.login;
+
+      if (status === "approved") {
+        approvedReviews.add(user);
+      } else if (status === "dismissed") {
+        const count = reviews.filter((r) => {
+          return r.user.login === user &&
+            r.state.toLowerCase() === "approved" &&
+            r.submitted_at > review.submitted_at;
+        }).length;
+
+        if (count === 0) {
+          approvedReviews.delete(user);
+        }
+      }
+    });
+
+    const desiredLabel = helper.getDesiredLabel(approvedReviews.size);
 
     const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
 

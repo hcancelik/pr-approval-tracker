@@ -6008,7 +6008,7 @@ module.exports = {
 
     return reviews;
   },
-  addLabelToPullRequest: async (token, owner, repo, id, labels) => {
+  addLabelToPullRequest: async (token, owner, repo, id, label) => {
     const octokit = github.getOctokit(token);
 
     try {
@@ -6016,7 +6016,7 @@ module.exports = {
         owner,
         repo,
         issue_number: id,
-        labels
+        labels: [label]
       });
 
       return true;

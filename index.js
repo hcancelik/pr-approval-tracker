@@ -8,10 +8,12 @@ async function run() {
     const { owner, repo,  } = github.repo;
     const { ref } = github;
 
+    let pr = null;
+
     core.info(`Ref is ${ref}`);
     core.info(`G is ${JSON.stringify(github)}`);
 
-    await action.run(token, owner, repo);
+    await action.run(token, owner, repo, pr);
   } catch (error) {
     core.setFailed(error.message);
   }

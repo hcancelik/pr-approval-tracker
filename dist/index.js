@@ -15,10 +15,12 @@ async function run() {
     const { owner, repo,  } = github.repo;
     const { ref } = github;
 
+    let pr = null;
+
     core.info(`Ref is ${ref}`);
     core.info(`G is ${JSON.stringify(github)}`);
 
-    await action.run(token, owner, repo);
+    await action.run(token, owner, repo, pr);
   } catch (error) {
     core.setFailed(error.message);
   }
@@ -5850,21 +5852,38 @@ const api = __nccwpck_require__(612);
 const helper = __nccwpck_require__(989);
 
 module.exports = {
-  run: async (token, owner, repo) => {
+  run: async (token, owner, repo, pr = null) => {
+    if (pr) {
+      await module.exports.checkPR(token, owner, repor, pr);
+    } else {
+      await module.exports.checkAllPRs(token, owner, repo);
+    }
+  },
+  checkPR: async(token, owner, repo, pr) => {
+    const pullRequest = await api.getPullRequest(pr);
+
+    const reviews = await api.getPullRequestReviews(token, owner, repo, pr);
+
+    await module.exports.checkLabels(token, owner, repo, pullRequest, reviews);
+  },
+  checkAllPRs: async (token, owner, repo) => {
     const pullRequests = await api.getOpenPullRequests(token, owner, repo);
 
     for await (const pullRequest of pullRequests) {
       const reviews = await api.getPullRequestReviews(token, owner, repo, pullRequest.number);
 
-      const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
+      await module.exports.checkLabels(token, owner, repo, pullRequest, reviews);
+    }
+  },
+  checkLabels: async(token, owner, repo, pullRequest, reviews) => {
+    const approvedReviewsCount = reviews.filter((review) => review.state === "APPROVED").length;
 
-      const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
+    const desiredLabel = helper.getDesiredLabel(approvedReviewsCount);
 
-      const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
+    const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
 
-      if (newLabels !== null) {
-        await api.setPullRequestLabels(token, owner, repo, pullRequest.number, newLabels);
-      }
+    if (newLabels !== null) {
+      await api.setPullRequestLabels(token, owner, repo, pullRequest.number, newLabels);
     }
   }
 };
@@ -5879,6 +5898,22 @@ const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 
 module.exports = {
+  getPullRequest: async (token, owner, repo, pr) => {
+    const octokit = github.getOctokit(token);
+
+    try {
+      const { data: pullRequest } = await octokit.pulls.get({
+        owner,
+        repo,
+        pull_number: pr
+      });
+
+      return pullRequest;
+    } catch (error) {
+      core.setFailed(`Get pull request call failed: ${error}`);
+      return null;
+    }
+  },
   getOpenPullRequests: async (token, owner, repo) => {
     const octokit = github.getOctokit(token);
 

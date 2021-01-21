@@ -5,7 +5,7 @@ const action = require("./src/action");
 async function run() {
   try {
     const token = core.getInput("SECRET_TOKEN");
-    const { owner, repo,  } = github.repo;
+    const { owner, repo } = github.repo;
     const { ref } = github;
 
     let pr = null;

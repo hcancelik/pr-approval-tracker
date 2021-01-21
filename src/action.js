@@ -59,7 +59,7 @@ class Action {
     const labelToRemove = helper.existingLabelNeedsToBeRemoved(pullRequest, desiredLabel);
 
     if (labelToRemove) {
-      await api.removeLabelFromPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
+      await api.removeLabelFromPullRequest(this.token, this.owner, this.repo, pullRequest.number, labelToRemove);
     }
 
     if (desiredLabel && helper.newLabelNeeded(pullRequest, desiredLabel)) {

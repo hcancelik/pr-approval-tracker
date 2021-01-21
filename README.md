@@ -1,6 +1,6 @@
 # Pull Request Review Approval Tracker
 
-This action will label open PRs with the count of approved reviews for quick referencing.
+This action will label PRs with the count of approved reviews for quick referencing.
 
 # Usage
 

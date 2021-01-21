@@ -62,7 +62,7 @@ class Action {
       await api.removeLabelFromPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
     }
 
-    if (helper.newLabelNeeded(pullRequest, desiredLabel)) {
+    if (desiredLabel && helper.newLabelNeeded(pullRequest, desiredLabel)) {
       await api.addLabelToPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
     }
   }

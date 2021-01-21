@@ -56,10 +56,14 @@ class Action {
 
     const desiredLabel = helper.getDesiredLabel(approvedReviews.size);
 
-    const newLabels = helper.getUpdatedLabels(pullRequest, desiredLabel);
+    const labelToRemove = helper.existingLabelNeedsToBeRemoved(pullRequest, desiredLabel);
 
-    if (newLabels !== null) {
-      await api.setPullRequestLabels(this.token, this.owner, this.repo, pullRequest.number, newLabels);
+    if (labelToRemove) {
+      await api.removeLabelFromPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
+    }
+
+    if (desiredLabel && helper.newLabelNeeded(pullRequest, desiredLabel)) {
+      await api.addLabelToPullRequest(this.token, this.owner, this.repo, pullRequest.number, desiredLabel);
     }
   }
 }

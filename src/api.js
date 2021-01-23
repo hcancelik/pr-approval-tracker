@@ -2,14 +2,15 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 
 module.exports = {
-  getPullRequest: async (token, owner, repo, pr) => {
+  getPullRequest: async (token, owner, repo, prSomething) => {
     const octokit = github.getOctokit(token);
 
     try {
       const { data: pullRequest } = await octokit.pulls.get({
         owner,
         repo,
-        pull_number: pr
+        this: "error",
+        pull_number: prSomething
       });
 
       return pullRequest;

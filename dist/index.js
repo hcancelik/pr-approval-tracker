@@ -5932,14 +5932,14 @@ const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 
 module.exports = {
-  getPullRequest: async (token, owner, repo, pr) => {
+  getPullRequest: async (token, owner, repo, prNumber) => {
     const octokit = github.getOctokit(token);
 
     try {
       const { data: pullRequest } = await octokit.pulls.get({
         owner,
         repo,
-        pull_number: pr
+        pull_number: prNumber
       });
 
       return pullRequest;
@@ -5979,7 +5979,7 @@ module.exports = {
 
     return pullRequests;
   },
-  getPullRequestReviews: async (token, owner, repo, id) => {
+  getPullRequestReviews: async (token, owner, repo, prNumber) => {
     const octokit = github.getOctokit(token);
 
     let reviews = [];
@@ -5991,7 +5991,7 @@ module.exports = {
         const { data:rvs } = await octokit.pulls.listReviews({
           owner,
           repo,
-          pull_number: id,
+          pull_number: prNumber,
           per_page: 100,
           page
         });
@@ -6026,14 +6026,14 @@ module.exports = {
       return false;
     }
   },
-  removeLabelFromPullRequest: async (token, owner, repo, id, name) => {
+  removeLabelFromPullRequest: async (token, owner, repo, prNumber, name) => {
     const octokit = github.getOctokit(token);
 
     try {
       await octokit.issues.removeLabel({
         owner,
         repo,
-        issue_number: id,
+        issue_number: prNumber,
         name
       });
 

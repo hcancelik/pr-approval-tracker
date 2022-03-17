@@ -1,6 +1,6 @@
 {
   "name": "pr-approval-tracker",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Pull Request Approval Tracker",
   "main": "index.js",
   "scripts": {

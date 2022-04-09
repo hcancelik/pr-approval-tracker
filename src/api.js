@@ -6,7 +6,7 @@ module.exports = {
     const octokit = github.getOctokit(token);
 
     try {
-      const { data: pullRequest } = await octokit.pulls.get({
+      const { data: pullRequest } = await octokit.rest.pulls.get({
         owner,
         repo,
         pull_number: prNumber
@@ -27,7 +27,7 @@ module.exports = {
 
     while (hasNextPage) {
       try {
-        const { data: prs } = await octokit.pulls.list({
+        const { data: prs } = await octokit.rest.pulls.list({
           owner,
           repo,
           state: "open",
@@ -58,7 +58,7 @@ module.exports = {
 
     while (hasNextPage) {
       try {
-        const { data:rvs } = await octokit.pulls.listReviews({
+        const { data:rvs } = await octokit.rest.pulls.listReviews({
           owner,
           repo,
           pull_number: prNumber,
@@ -82,7 +82,7 @@ module.exports = {
     const octokit = github.getOctokit(token);
 
     try {
-      await octokit.issues.addLabels({
+      await octokit.rest.issues.addLabels({
         owner,
         repo,
         issue_number: id,
@@ -100,7 +100,7 @@ module.exports = {
     const octokit = github.getOctokit(token);
 
     try {
-      await octokit.issues.removeLabel({
+      await octokit.rest.issues.removeLabel({
         owner,
         repo,
         issue_number: prNumber,

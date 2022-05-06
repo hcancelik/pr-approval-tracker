@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/hcancelik/pr-approval-tracker/issues#readme",
   "dependencies": {
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.8.0",
     "@actions/github": "^5.0.1"
   },
   "devDependencies": {
